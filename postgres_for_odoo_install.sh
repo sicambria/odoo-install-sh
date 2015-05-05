@@ -1,35 +1,30 @@
 #!/bin/bash
 ################################################################################
-# Script for Installation: OpenERP 7.0 server on Ubuntu 12.04 LTS
-# Author: André Schenkels, ICTSTUDIO 2013
+# Script for Installation: PostgreSQL 9.2 on Ubuntu 12.04 LTS
+# Original author: André Schenkels, ICTSTUDIO 2013
 #-------------------------------------------------------------------------------
-#  
-# This script will install OpenERP Server with PostgreSQL server 9.2 on
-# clean Ubuntu 12.04 Server
+# Modified by Sicambria
+# https://github.com/sicambria/
+#-------------------------------------------------------------------------------
+# This script will install PostgreSQL server 9.2 on a clean Ubuntu 12.04 Server
 #-------------------------------------------------------------------------------
 # USAGE:
-#
-# oe-install
-#
-# EXAMPLE:
-# oe-install 
+# wget https://raw.githubusercontent.com/sicambria/odoo-install-sh/master/postgres_for_odoo_install.sh
+# sudo sh postgres_for_odoo_install.sh
 #
 ################################################################################
  
-##fixed parameters
-#openerp
+# OpenERP/Odoo username
 OE_USER="openerp"
-OE_HOME="/opt/openerp"
 
-#Enter version for checkout "/6.1" for version 6.1, "/7.0" for version 7.0 and "" for trunk
-OE_VERSION="/7.0"
-
-#set the superadmin password
-OE_SUPERADMIN="superadminpasswordmyodoo"
-OE_CONFIG="openerp-server"
-
-#choose postgresql version [8.4, 9.1, 9.2 or 9.3]
+#choose PostgreSQL version [8.4, 9.1, 9.2 or 9.3]
 PG_VERSION="9.2"
+
+# PostgreSQL IP address
+ODOO_VM_IP_ADDRESS="127.0.0.1"
+
+# Set the PostgreSQL password for OE_USER
+DBMS_PASSWORD="ChangeFromDefaultpasswdToComplexPassword"
 
 #--------------------------------------------------
 # Install PostgreSQL Server
@@ -50,9 +45,14 @@ sudo sed -i s/"#listen_addresses = 'localhost'"/"listen_addresses = '*'"/g /etc/
 echo -e "\n---- Creating the OpenERP PostgreSQL User  ----"
 sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 
+# Alter password for previously created user:
+sudo -u postgres psql -c "alter user $OE_USER password $DBMS_PASSWORD;"
 
+# Allow access from the specified IP address
+sudo echo "host all all $ODOO_VM_IP_ADDRESS/32 md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf
 
-
+# RESTART PostgreSQL
+sudo service postgresql restart 
  
 echo "PostgreSQL install done!"
 

@@ -1,30 +1,36 @@
 #!/bin/bash
 ################################################################################
 # Script for Installation: OpenERP 7.0 server on Ubuntu 12.04 LTS
-# Author: André Schenkels, ICTSTUDIO 2013
+# Original author: André Schenkels, ICTSTUDIO 2013
 #-------------------------------------------------------------------------------
-#  
-# This script will install OpenERP Server with PostgreSQL server 9.2 on
-# clean Ubuntu 12.04 Server
+# Modified by Sicambria
+# https://github.com/sicambria/
+#-------------------------------------------------------------------------------
+# This script will install OpenERP Server on a clean Ubuntu 12.04 Server
 #-------------------------------------------------------------------------------
 # USAGE:
-#
-# oe-install
-#
-# EXAMPLE:
-# oe-install 
+# wget https://raw.githubusercontent.com/sicambria/odoo-install-sh/master/odoo_only_install.sh
+# sudo sh odoo_only_install.sh
 #
 ################################################################################
  
-##fixed parameters
-#openerp
+# OpenERP/Odoo parameters
 OE_USER="openerp"
 OE_HOME="/opt/openerp"
+
+# Set the superadmin password
+OE_SUPERADMIN="superadminpasswordmyodoo"
+OE_CONFIG="openerp-server"
+
+# PostgreSQL host connection data
+DBMS_VM_IP_ADDRESS="127.0.0.1"
+DBMS_VM_PORT="5432"
+DBMS_PASSWORD="ChangeFromDefaultpasswdToComplexPassword"
 
 #Enter version for checkout "/6.1" for version 6.1, "/7.0" for version 7.0 and "" for trunk
 OE_VERSION="/7.0"
 
-#set bazaar parameters
+# --- Set bazaar parameters ---
 
 #BZR_LATEST will use the current version
 BZR_LATEST=true
@@ -32,15 +38,10 @@ BZR_LATEST=true
 #BZR_LIGHTWEIGHT will do a lightweight checkout of the code
 BZR_LIGHTWEIGHT=true
 
-#Specifiy the revision you want to use if BZR_LATEST = false
+# Specify the revision you want to use if BZR_LATEST = false
 OE_WEB_REV="3941"
 OE_SERVER_REV="5004"
 OE_ADDONS_REV="9154"
-
-#set the superadmin password
-OE_SUPERADMIN="superadminpasswordmyodoo"
-OE_CONFIG="openerp-server"
-
 
 #--------------------------------------------------
 # Install Dependencies
@@ -200,6 +201,12 @@ sudo chown root: /etc/init.d/$OE_CONFIG
 
 echo -e "* Start OpenERP on Startup"
 sudo update-rc.d $OE_CONFIG defaults
+
+# Configure external DBMS
+sudo perl -pi -e 's?db_host = .*?db_host = '$DBMS_VM_IP_ADDRESS'?g' /etc/openerp-server.conf
+sudo perl -pi -e 's?db_port.*?db_port = '$DBMS_VM_PORT'?g' /etc/openerp-server.conf
+sudo perl -pi -e 's?db_password = .*?db_password = '$DBMS_PASSWORD'?g' /etc/openerp-server.conf
+
  
 echo "Done! The OpenERP server can be started with /etc/init.d/$OE_CONFIG"
 
