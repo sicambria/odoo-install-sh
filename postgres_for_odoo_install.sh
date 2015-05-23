@@ -46,7 +46,7 @@ echo -e "\n---- Creating the OpenERP PostgreSQL User  ----"
 sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 
 # Alter password for previously created user:
-sudo -u postgres psql -c "alter user $OE_USER password $DBMS_PASSWORD;"
+sudo -u postgres psql -c "alter user $OE_USER password '"$DBMS_PASSWORD"';"
 
 # Allow access from the specified IP address
 sudo echo "host all all $ODOO_VM_IP_ADDRESS/32 md5" >> /etc/postgresql/$PG_VERSION/main/pg_hba.conf
